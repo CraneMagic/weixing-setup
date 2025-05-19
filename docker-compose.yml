@@ -1,0 +1,89 @@
+version: "3.8"
+
+services:
+  websocket-server:
+    image: yijun9124/weixing-websocket-server:${TAG:-latest}
+    container_name: websocket-server
+    hostname: websocket-server
+    restart: unless-stopped
+    ports:
+      - "${HOST_PORT:-8080}:${WS_PORT:-8080}"
+    environment:
+      - WS_PORT=${WS_PORT:-8080}
+      # 可以在此添加其他环境变量
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - weixing-network
+  udp-ws-service:
+    image: yijun9124/weixing-udp-ws-service:${TAG:-latest}
+    container_name: udp-ws-service
+    hostname: udp-ws-service
+    restart: unless-stopped
+    ports:
+      - "8999:8999"
+      - "41234:41234/udp"
+      - "2000:2000/udp"
+    env_file:
+      - .env
+    environment:
+      - WS_SERVER=ws://websocket-server:8080
+    volumes:
+      - ./data:/usr/src/app/data
+      - ./logs:/usr/src/app/logs
+      - ./error:/usr/src/app/error
+      - ./temp:/usr/src/app/temp
+    networks:
+      - weixing-network
+  backend-service:
+    image: yijun9124/weixing-service:${TAG:-latest}
+    container_name: backend-service
+    hostname: backend-service
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    # environment:
+    #   - NODE_ENV=production
+    #   - PORT=3000
+    #   - DB_PATH=/app/data
+    #   - SERIAL_PORT=COM4
+    #   # 可以添加其他环境变量，如数据保留天数等
+    #   - DATA_RETENTION_DAYS=90
+    #   - CLEANUP_INTERVAL_DAYS=7
+    env_file:
+      - .env
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://backend-service:3000/api/parameters",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - weixing-network
+  frontend:
+    image: yijun9124/weixing-frontend:${TAG:-latest}
+    container_name: frontend
+    hostname: frontend
+    restart: unless-stopped
+    ports:
+      - "3002:3000"
+    environment:
+      - NEXT_PUBLIC_WEBSOCKET_SERVER=ws://websocket-server:8080
+      - NEXT_PUBLIC_HTTP_SERVER=http://backend-service:3000
+    networks:
+      - weixing-network
+
+networks:
+  weixing-network:
+    driver: bridge
