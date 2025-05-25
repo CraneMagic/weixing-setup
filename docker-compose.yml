@@ -28,6 +28,8 @@ services:
       - .env
     environment:
       - WS_SERVER=ws://websocket-server:8080
+      - WEIXING_SERVICE_PARAMETERS_API_URL=http://backend-service:3000/api/parameters
+      - WEIXING_SERVICE_MEASUREMENTS_API_URL=http://backend-service:3000/api/measurements
     volumes:
       - ./data:/usr/src/app/data
       - ./logs:/usr/src/app/logs
