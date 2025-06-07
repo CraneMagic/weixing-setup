@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   websocket-server:
     image: yijun9124/weixing-websocket-server:${TAG:-latest}
