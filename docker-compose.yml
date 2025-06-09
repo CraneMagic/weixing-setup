@@ -6,9 +6,8 @@ services:
     restart: unless-stopped
     ports:
       - "${HOST_PORT:-8080}:${WS_PORT:-8080}"
-    environment:
-      - WS_PORT=${WS_PORT:-8080}
-      # 可以在此添加其他环境变量
+    env_file:
+      - .env
     volumes:
       - ./logs:/app/logs
     networks:
@@ -22,11 +21,6 @@ services:
       - "2000:2000/udp"
     env_file:
       - .env
-    environment:
-      - LIGHT_ACTIVE=true
-      - WS_SERVER=ws://websocket-server:8080
-      - WEIXING_SERVICE_PARAMETERS_API_URL=http://backend-service:3000/api/parameters
-      - WEIXING_SERVICE_MEASUREMENTS_API_URL=http://backend-service:3000/api/measurements
     volumes:
       - ./data:/usr/src/app/data
       - ./logs:/usr/src/app/logs
@@ -41,11 +35,6 @@ services:
       - "8999:8999"
     env_file:
       - .env
-    environment:
-      - WS_SERVER=ws://websocket-server:8080
-      - WEIXING_SERVICE_PARAMETERS_API_URL=http://backend-service:3000/api/parameters
-      - WEIXING_SERVICE_MEASUREMENTS_API_URL=http://backend-service:3000/api/measurements
-      - WEIXING_SERVICE_QUALITY_API_URL=http://backend-service:3000/api/quality-records
     volumes:
       - ./data:/usr/src/app/data
       - ./logs:/usr/src/app/logs
@@ -83,14 +72,6 @@ services:
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
-    # environment:
-    #   - NODE_ENV=production
-    #   - PORT=3000
-    #   - DB_PATH=/app/data
-    #   - SERIAL_PORT=COM4
-    #   # 可以添加其他环境变量，如数据保留天数等
-    #   - DATA_RETENTION_DAYS=90
-    #   - CLEANUP_INTERVAL_DAYS=7
     env_file:
       - .env
     healthcheck:
@@ -116,9 +97,8 @@ services:
     restart: unless-stopped
     ports:
       - "3002:3000"
-    environment:
-      - NEXT_PUBLIC_WEBSOCKET_SERVER=ws://websocket-server:8080
-      - NEXT_PUBLIC_HTTP_SERVER=http://backend-service:3000
+    env_file:
+      - .env
     networks:
       - weixing-network
 
