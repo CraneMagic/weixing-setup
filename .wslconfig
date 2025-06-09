@@ -1,0 +1,5 @@
+[wsl2]
+memory=16GB        # 分配给 WSL2 的最大内存
+processors=4      # 可用的 CPU 核心数
+swap=0            # Swap 文件大小（虚拟内存）
+localhostForwarding=true  # 启用 localhost 转发（建议开启）
