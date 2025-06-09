@@ -109,18 +109,18 @@ services:
       start_period: 10s
     networks:
       - weixing-network
-  # frontend:
-  #   image: yijun9124/weixing-frontend:${TAG:-latest}
-  #   container_name: frontend
-  #   hostname: frontend
-  #   restart: unless-stopped
-  #   ports:
-  #     - "3002:3000"
-  #   environment:
-  #     - NEXT_PUBLIC_WEBSOCKET_SERVER=ws://websocket-server:8080
-  #     - NEXT_PUBLIC_HTTP_SERVER=http://backend-service:3000
-  #   networks:
-  #     - weixing-network
+  frontend:
+    image: yijun9124/weixing-frontend:${TAG:-latest}
+    container_name: frontend
+    hostname: frontend
+    restart: unless-stopped
+    ports:
+      - "3002:3000"
+    environment:
+      - NEXT_PUBLIC_WEBSOCKET_SERVER=ws://websocket-server:8080
+      - NEXT_PUBLIC_HTTP_SERVER=http://backend-service:3000
+    networks:
+      - weixing-network
 
 networks:
   weixing-network:
