@@ -23,6 +23,9 @@ services:
       - .env
     volumes:
       - ./logs:/app/logs
+    devices:
+      - "/dev/ttyS2:/dev/ttyS2"
+      - "/dev/ttyS3:/dev/ttyS3"
     networks:
       - weixing-network
   udp-server:
@@ -98,7 +101,6 @@ services:
 networks:
   weixing-network:
     driver: bridge
-
 
 volumes:
   postgres-data:
