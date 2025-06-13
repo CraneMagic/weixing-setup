@@ -1,4 +1,17 @@
 services:
+  postgres:
+    image: postgres:15
+    restart: always
+    container_name: postgres
+    hostname: postgres
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - weixing-network
   websocket-server:
     image: yijun9124/weixing-websocket-server:${TAG:-latest}
     container_name: websocket-server
@@ -42,26 +55,6 @@ services:
       - ./temp:/usr/src/app/temp
     networks:
       - weixing-network
-  # udp-ws-service:
-  #   image: yijun9124/weixing-udp-ws-service:${TAG:-latest}
-  #   container_name: udp-ws-service
-  #   hostname: udp-ws-service
-  #   restart: unless-stopped
-  #   ports:
-  #     - "8999:8999"
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - WS_SERVER=ws://websocket-server:8080
-  #     - WEIXING_SERVICE_PARAMETERS_API_URL=http://backend-service:3000/api/parameters
-  #     - WEIXING_SERVICE_MEASUREMENTS_API_URL=http://backend-service:3000/api/measurements
-  #   volumes:
-  #     - ./data:/usr/src/app/data
-  #     - ./logs:/usr/src/app/logs
-  #     - ./error:/usr/src/app/error
-  #     - ./temp:/usr/src/app/temp
-  #   networks:
-  #     - weixing-network
   backend-service:
     image: yijun9124/weixing-service:${TAG:-latest}
     container_name: backend-service
@@ -105,3 +98,8 @@ services:
 networks:
   weixing-network:
     driver: bridge
+
+
+volumes:
+  postgres-data:
+    driver: local
