@@ -68,6 +68,7 @@ services:
     devices:
       - "/dev/ttyS2:/dev/ttyS2"
       - "/dev/ttyS3:/dev/ttyS3"
+    privileged: true
     env_file:
       - .env
     healthcheck:
