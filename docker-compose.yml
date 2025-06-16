@@ -23,6 +23,8 @@ services:
       - .env
     volumes:
       - ./logs:/app/logs
+    depends_on:
+      - backend-service
     networks:
       - weixing-network
   udp-server:
@@ -37,6 +39,8 @@ services:
     volumes:
       - ./data:/usr/src/app/data
       - ./logs:/usr/src/app/logs
+    depends_on:
+      - backend-service
     networks:
       - weixing-network
   tcp-server:
@@ -53,6 +57,8 @@ services:
       - ./logs:/usr/src/app/logs
       - ./error:/usr/src/app/error
       - ./temp:/usr/src/app/temp
+    depends_on:
+      - backend-service
     networks:
       - weixing-network
   backend-service:
@@ -71,6 +77,8 @@ services:
     privileged: true
     env_file:
       - .env
+    depends_on:
+      - postgres
     healthcheck:
       test:
         [
@@ -96,6 +104,8 @@ services:
       - "3002:3000"
     env_file:
       - .env
+    depends_on:
+      - backend-service
     networks:
       - weixing-network
 
