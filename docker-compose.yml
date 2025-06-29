@@ -23,8 +23,8 @@ services:
       - .env
     volumes:
       - ./logs:/app/logs
-    depends_on:
-      - backend-service
+    # depends_on:
+    #   - backend-service
     networks:
       - weixing-network
   udp-server:
@@ -39,62 +39,63 @@ services:
     volumes:
       - ./data:/usr/src/app/data
       - ./logs:/usr/src/app/logs
-    depends_on:
-      - backend-service
+    # depends_on:
+    #   - backend-service
     networks:
       - weixing-network
-  tcp-server:
-    image: yijun9124/weixing-tcp-server:${TAG:-latest}
-    container_name: tcp-server
-    hostname: tcp-server
-    restart: unless-stopped
-    ports:
-      - "8999:8999"
-    env_file:
-      - .env
-    volumes:
-      - ./data:/usr/src/app/data
-      - ./logs:/usr/src/app/logs
-      - ./error:/usr/src/app/error
-      - ./temp:/usr/src/app/temp
-    depends_on:
-      - backend-service
-    networks:
-      - weixing-network
-  backend-service:
-    image: yijun9124/weixing-service:${TAG:-latest}
-    container_name: backend-service
-    hostname: backend-service
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./data:/app/data
-      - ./logs:/app/logs
-    devices:
-      - "/dev/ttyS2:/dev/ttyS2"
-      - "/dev/ttyS3:/dev/ttyS3"
-    privileged: true
-    env_file:
-      - .env
-    depends_on:
-      - postgres
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--no-verbose",
-          "--tries=1",
-          "--spider",
-          "http://backend-service:3000/api/parameters",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-    networks:
-      - weixing-network
+  # tcp-server:
+  #   image: yijun9124/weixing-tcp-server:${TAG:-latest}
+  #   container_name: tcp-server
+  #   hostname: tcp-server
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8999:8999"
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - ./data:/usr/src/app/data
+  #     - ./logs:/usr/src/app/logs
+  #     - ./error:/usr/src/app/error
+  #     - ./temp:/usr/src/app/temp
+  #   depends_on:
+  #     - backend-service
+  #     - websocket-server
+  #   networks:
+  #     - weixing-network
+  # backend-service:
+  #   image: yijun9124/weixing-service:${TAG:-latest}
+  #   container_name: backend-service
+  #   hostname: backend-service
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./data:/app/data
+  #     - ./logs:/app/logs
+  #   devices:
+  #     - "/dev/ttyS2:/dev/ttyS2"
+  #     - "/dev/ttyS3:/dev/ttyS3"
+  #   privileged: true
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - postgres
+  #   healthcheck:
+  #     test:
+  #       [
+  #         "CMD",
+  #         "wget",
+  #         "--no-verbose",
+  #         "--tries=1",
+  #         "--spider",
+  #         "http://backend-service:3000/api/parameters",
+  #       ]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 10s
+  #   networks:
+  #     - weixing-network
   frontend:
     image: yijun9124/weixing-frontend:${TAG:-latest}
     container_name: frontend
@@ -104,8 +105,8 @@ services:
       - "3002:3000"
     env_file:
       - .env
-    depends_on:
-      - backend-service
+    # depends_on:
+    #   - backend-service
     networks:
       - weixing-network
 
