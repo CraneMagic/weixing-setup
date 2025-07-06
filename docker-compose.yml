@@ -69,6 +69,9 @@ services:
     image: yijun9124/weixing-service:${TAG:-latest}
     container_name: backend-service
     hostname: backend-service
+    user: "${UID}:${GID}"
+    group_add:
+      - dialout
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -76,8 +79,7 @@ services:
       - ./data:/app/data:rw
       - ./logs:/app/logs:rw
     devices:
-      - "/dev/ttyS2:/dev/ttyS2"
-      - "/dev/ttyS3:/dev/ttyS3"
+      - "/dev/ttyUSB0:/dev/ttyUSB0"
     privileged: true
     env_file:
       - .env
