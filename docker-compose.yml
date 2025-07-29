@@ -45,15 +45,41 @@ services:
     #   - backend-service
     networks:
       - weixing-network
-  tcp-server:
+  # tcp-server:
+  #   image: yijun9124/weixing-tcp-server:${TAG:-latest}
+  #   container_name: tcp-server
+  #   hostname: tcp-server
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8999:8999"
+  #   env_file:
+  #     - .env
+  #   user: "${UID}:${GID}"
+  #   volumes:
+  #     - ./data:/usr/src/app/data:rw
+  #     - ./logs:/usr/src/app/logs:rw
+  #     - ./error:/usr/src/app/error:rw
+  #     - ./temp:/usr/src/app/temp:rw
+  #   depends_on:
+  #     - backend-service
+  #     - websocket-server
+  #   networks:
+  #     - weixing-network
+  tcp-server-1:
     image: yijun9124/weixing-tcp-server:${TAG:-latest}
-    container_name: tcp-server
-    hostname: tcp-server
+    container_name: tcp-server-1
+    hostname: tcp-server-1
     restart: unless-stopped
     ports:
       - "8999:8999"
     env_file:
       - .env
+    environment:
+      - CAMERA_ID=1
+      - CAMERA_PORT=8999
+      - CAMERA_NAME=camera1
+      - BUFFER_SIZE=65536
+      - THREAD_POOL_SIZE=4
     user: "${UID}:${GID}"
     volumes:
       - ./data:/usr/src/app/data:rw
@@ -65,6 +91,85 @@ services:
       - websocket-server
     networks:
       - weixing-network
+    # 性能优化配置
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+  tcp-server-2:
+    image: yijun9124/weixing-tcp-server:${TAG:-latest}
+    container_name: tcp-server-2
+    hostname: tcp-server-2
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    env_file:
+      - .env
+    environment:
+      - CAMERA_ID=2
+      - CAMERA_PORT=9000
+      - CAMERA_NAME=camera2
+      - BUFFER_SIZE=65536
+      - THREAD_POOL_SIZE=4
+    user: "${UID}:${GID}"
+    volumes:
+      - ./data:/usr/src/app/data:rw
+      - ./logs:/usr/src/app/logs:rw
+      - ./error:/usr/src/app/error:rw
+      - ./temp:/usr/src/app/temp:rw
+    depends_on:
+      - backend-service
+      - websocket-server
+    networks:
+      - weixing-network
+    # 性能优化配置
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+  tcp-server-3:
+    image: yijun9124/weixing-tcp-server:${TAG:-latest}
+    container_name: tcp-server-3
+    hostname: tcp-server-3
+    restart: unless-stopped
+    ports:
+      - "9001:9001"
+    env_file:
+      - .env
+    environment:
+      - CAMERA_ID=3
+      - CAMERA_PORT=9001
+      - CAMERA_NAME=camera3
+      - BUFFER_SIZE=65536
+      - THREAD_POOL_SIZE=4
+    user: "${UID}:${GID}"
+    volumes:
+      - ./data:/usr/src/app/data:rw
+      - ./logs:/usr/src/app/logs:rw
+      - ./error:/usr/src/app/error:rw
+      - ./temp:/usr/src/app/temp:rw
+    depends_on:
+      - backend-service
+      - websocket-server
+    networks:
+      - weixing-network
+    # 性能优化配置
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
   backend-service:
     image: yijun9124/weixing-service:${TAG:-latest}
     container_name: backend-service
