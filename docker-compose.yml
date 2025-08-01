@@ -106,12 +106,12 @@ services:
     hostname: tcp-server-2
     restart: unless-stopped
     ports:
-      - "9000:9000"
+      - "9000:8999"
     env_file:
       - .env
     environment:
       - CAMERA_ID=2
-      - CAMERA_PORT=9000
+      - CAMERA_PORT=8999
       - CAMERA_NAME=camera2
       - BUFFER_SIZE=65536
       - THREAD_POOL_SIZE=4
@@ -141,12 +141,12 @@ services:
     hostname: tcp-server-3
     restart: unless-stopped
     ports:
-      - "9001:9001"
+      - "9001:8999"
     env_file:
       - .env
     environment:
       - CAMERA_ID=3
-      - CAMERA_PORT=9001
+      - CAMERA_PORT=8999
       - CAMERA_NAME=camera3
       - BUFFER_SIZE=65536
       - THREAD_POOL_SIZE=4
