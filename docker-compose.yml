@@ -1,47 +1,41 @@
-x-resources: &default-limits
-  # 这里定义一个可重复引用的模板，简化写法
-  deploy:
-    resources:
-      reservations:
-        cpus: "0.25"     # 默认预留 0.25 核、128 MiB
-        memory: 128M
-      limits:
-        cpus: "0.25"
-        memory: 256M
-
 services:
-  # ────────────────────────── 数据库 ──────────────────────────
   postgres:
     image: postgres:15
+    restart: always
     container_name: postgres
-    env_file: .env
+    hostname: postgres
     ports:
       - "5432:5432"
+    env_file:
+      - .env
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    networks: [weixing-network]
-
+    networks:
+      - weixing-network
     deploy:
       resources:
         reservations:
           cpus: "0.25"
           memory: 256M
         limits:
-          cpus: "0.50"   # 上限半核
+          cpus: "0.50"
           memory: 1G
-
-  # ────────────────────────── WebSocket ──────────────────────────
   websocket-server:
     image: yijun9124/weixing-websocket-server:${TAG:-latest}
     container_name: websocket-server
-    env_file: .env
-    user: "${UID}:${GID}"
+    hostname: websocket-server
+    restart: unless-stopped
     ports:
       - "${HOST_PORT:-8080}:${WS_PORT:-8080}"
+    env_file:
+      - .env
+    user: "${UID}:${GID}"
     volumes:
       - ./logs:/app/logs:rw
-    networks: [weixing-network]
-
+    # depends_on:
+    #   - backend-service
+    networks:
+      - weixing-network
     deploy:
       resources:
         reservations:
@@ -50,28 +44,60 @@ services:
         limits:
           cpus: "0.30"
           memory: 512M
-
-  # ────────────────────────── UDP ──────────────────────────
   udp-server:
     image: yijun9124/weixing-udp-server:${TAG:-latest}
     container_name: udp-server
-    env_file: .env
-    user: "${UID}:${GID}"
+    hostname: udp-server
+    restart: unless-stopped
     ports:
       - "2000:2000/udp"
+    env_file:
+      - .env
+    user: "${UID}:${GID}"
     volumes:
       - ./data:/usr/src/app/data:rw
       - ./logs:/usr/src/app/logs:rw
-    networks: [weixing-network]
-
-    <<: *default-limits        # 引用模板：0.25 vCPU / 256 MiB
-
-  # ────────────────────────── TCP 摄像机流 ──────────────────────────
-  # 3 路示例，如需减少/增加直接复制改端口和 CAMERA_ID
+    # depends_on:
+    #   - backend-service
+    networks:
+      - weixing-network
+    deploy:
+      resources:
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+        limits:
+          cpus: "0.25"
+          memory: 256M
+  # tcp-server:
+  #   image: yijun9124/weixing-tcp-server:${TAG:-latest}
+  #   container_name: tcp-server
+  #   hostname: tcp-server
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8999:8999"
+  #   env_file:
+  #     - .env
+  #   user: "${UID}:${GID}"
+  #   volumes:
+  #     - ./data:/usr/src/app/data:rw
+  #     - ./logs:/usr/src/app/logs:rw
+  #     - ./error:/usr/src/app/error:rw
+  #     - ./temp:/usr/src/app/temp:rw
+  #   depends_on:
+  #     - backend-service
+  #     - websocket-server
+  #   networks:
+  #     - weixing-network
   tcp-server-1:
     image: yijun9124/weixing-tcp-server:${TAG:-latest}
     container_name: tcp-server-1
-    env_file: .env
+    hostname: tcp-server-1
+    restart: unless-stopped
+    ports:
+      - "8999:8999"
+    env_file:
+      - .env
     environment:
       - CAMERA_ID=1
       - CAMERA_PORT=8999
@@ -79,16 +105,16 @@ services:
       - BUFFER_SIZE=65536
       - THREAD_POOL_SIZE=4
     user: "${UID}:${GID}"
-    ports:
-      - "8999:8999"
     volumes:
       - ./data:/usr/src/app/data:rw
       - ./logs:/usr/src/app/logs:rw
       - ./error:/usr/src/app/error:rw
       - ./temp:/usr/src/app/temp:rw
-    depends_on: [backend-service, websocket-server]
-    networks: [weixing-network]
-
+    depends_on:
+      - backend-service
+      - websocket-server
+    networks:
+      - weixing-network
     deploy:
       resources:
         reservations:
@@ -97,51 +123,110 @@ services:
         limits:
           cpus: "0.60"
           memory: 1G
-
   tcp-server-2:
-    <<: *tcp-server-1           # 继承上一段
+    image: yijun9124/weixing-tcp-server:${TAG:-latest}
     container_name: tcp-server-2
+    hostname: tcp-server-2
+    restart: unless-stopped
     ports:
       - "9000:8999"
+    env_file:
+      - .env
     environment:
       - CAMERA_ID=2
       - CAMERA_PORT=8999
       - CAMERA_NAME=camera2
-
+      - BUFFER_SIZE=65536
+      - THREAD_POOL_SIZE=4
+    user: "${UID}:${GID}"
+    volumes:
+      - ./data:/usr/src/app/data:rw
+      - ./logs:/usr/src/app/logs:rw
+      - ./error:/usr/src/app/error:rw
+      - ./temp:/usr/src/app/temp:rw
+    depends_on:
+      - backend-service
+      - websocket-server
+    networks:
+      - weixing-network
+    deploy:
+      resources:
+        reservations:
+          cpus: "0.30"
+          memory: 256M
+        limits:
+          cpus: "0.60"
+          memory: 1G
   tcp-server-3:
-    <<: *tcp-server-1
+    image: yijun9124/weixing-tcp-server:${TAG:-latest}
     container_name: tcp-server-3
+    hostname: tcp-server-3
+    restart: unless-stopped
     ports:
       - "9001:8999"
+    env_file:
+      - .env
     environment:
       - CAMERA_ID=3
       - CAMERA_PORT=8999
       - CAMERA_NAME=camera3
-
-  # ────────────────────────── 后端业务 ──────────────────────────
+      - BUFFER_SIZE=65536
+      - THREAD_POOL_SIZE=4
+    user: "${UID}:${GID}"
+    volumes:
+      - ./data:/usr/src/app/data:rw
+      - ./logs:/usr/src/app/logs:rw
+      - ./error:/usr/src/app/error:rw
+      - ./temp:/usr/src/app/temp:rw
+    depends_on:
+      - backend-service
+      - websocket-server
+    networks:
+      - weixing-network
+    deploy:
+      resources:
+        reservations:
+          cpus: "0.30"
+          memory: 256M
+        limits:
+          cpus: "0.60"
+          memory: 1G
   backend-service:
     image: yijun9124/weixing-service:${TAG:-latest}
     container_name: backend-service
-    env_file: .env
+    hostname: backend-service
     user: "${UID}:${GID}"
-    group_add: [dialout]
+    group_add:
+      - dialout
+    restart: unless-stopped
     ports:
       - "3000:3000"
-    devices:
-      - "/dev/ttyUSB0:/dev/ttyUSB0"
-    privileged: true
     volumes:
       - ./data:/app/data:rw
       - ./logs:/app/logs:rw
-    depends_on: [postgres]
+    devices:
+      - "/dev/ttyUSB0:/dev/ttyUSB0"
+    privileged: true
+    env_file:
+      - .env
+    depends_on:
+      - postgres
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://backend-service:3000/api/parameters"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://backend-service:3000/api/parameters",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
-    networks: [weixing-network]
-
+    networks:
+      - weixing-network
     deploy:
       resources:
         reservations:
@@ -150,17 +235,20 @@ services:
         limits:
           cpus: "1.00"
           memory: 3G
-
-  # ────────────────────────── 前端 ──────────────────────────
   frontend:
     image: yijun9124/weixing-frontend:${TAG:-latest}
     container_name: frontend
-    env_file: .env
-    user: "${UID}:${GID}"
+    hostname: frontend
+    restart: unless-stopped
     ports:
       - "3002:3000"
-    networks: [weixing-network]
-
+    env_file:
+      - .env
+    user: "${UID}:${GID}"
+    # depends_on:
+    #   - backend-service
+    networks:
+      - weixing-network
     deploy:
       resources:
         reservations:
@@ -170,7 +258,6 @@ services:
           cpus: "0.50"
           memory: 512M
 
-# ────────────────────────── 共用网络 & 卷 ──────────────────────────
 networks:
   weixing-network:
     driver: bridge
