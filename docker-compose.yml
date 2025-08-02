@@ -28,6 +28,15 @@ services:
     #   - backend-service
     networks:
       - weixing-network
+    # 性能优化配置
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
   udp-server:
     image: yijun9124/weixing-udp-server:${TAG:-latest}
     container_name: udp-server
@@ -95,11 +104,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.5"
-          memory: 512M
+          cpus: "0.8"
+          memory: 2G
         reservations:
-          cpus: "0.25"
-          memory: 256M
+          cpus: "0.4"
+          memory: 1G
   tcp-server-2:
     image: yijun9124/weixing-tcp-server:${TAG:-latest}
     container_name: tcp-server-2
@@ -130,11 +139,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.5"
-          memory: 512M
+          cpus: "0.8"
+          memory: 2G
         reservations:
-          cpus: "0.25"
-          memory: 256M
+          cpus: "0.4"
+          memory: 1G
   tcp-server-3:
     image: yijun9124/weixing-tcp-server:${TAG:-latest}
     container_name: tcp-server-3
@@ -165,11 +174,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.5"
-          memory: 512M
+          cpus: "0.8"
+          memory: 2G
         reservations:
-          cpus: "0.25"
-          memory: 256M
+          cpus: "0.4"
+          memory: 1G
   backend-service:
     image: yijun9124/weixing-service:${TAG:-latest}
     container_name: backend-service
@@ -206,6 +215,15 @@ services:
       start_period: 10s
     networks:
       - weixing-network
+    # 性能优化配置
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: 3G
+        reservations:
+          cpus: "1.0"
+          memory: 2G
   frontend:
     image: yijun9124/weixing-frontend:${TAG:-latest}
     container_name: frontend
