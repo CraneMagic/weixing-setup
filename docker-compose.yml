@@ -8,8 +8,12 @@ services:
       - "5432:5432"
     env_file:
       - .env
+    environment:
+      TZ: Asia/Shanghai
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     networks:
       - weixing-network
     deploy:
@@ -29,9 +33,13 @@ services:
       - "${HOST_PORT:-8080}:${WS_PORT:-8080}"
     env_file:
       - .env
+    environment:
+      TZ: Asia/Shanghai
     user: "${UID}:${GID}"
     volumes:
       - ./logs:/app/logs:rw
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     # depends_on:
     #   - backend-service
     networks:
@@ -53,10 +61,14 @@ services:
       - "2000:2000/udp"
     env_file:
       - .env
+    environment:
+      TZ: Asia/Shanghai
     user: "${UID}:${GID}"
     volumes:
       - ./data:/usr/src/app/data:rw
       - ./logs:/usr/src/app/logs:rw
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     # depends_on:
     #   - backend-service
     networks:
@@ -104,12 +116,14 @@ services:
       - CAMERA_NAME=camera1
       - BUFFER_SIZE=65536
       - THREAD_POOL_SIZE=4
+      - TZ=Asia/Shanghai
     user: "${UID}:${GID}"
     volumes:
       - ./data:/usr/src/app/data:rw
       - ./logs:/usr/src/app/logs:rw
-      - ./error:/usr/src/app/error:rw
       - ./temp:/usr/src/app/temp:rw
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     depends_on:
       - backend-service
       - websocket-server
@@ -138,12 +152,14 @@ services:
       - CAMERA_NAME=camera2
       - BUFFER_SIZE=65536
       - THREAD_POOL_SIZE=4
+      - TZ=Asia/Shanghai
     user: "${UID}:${GID}"
     volumes:
       - ./data:/usr/src/app/data:rw
       - ./logs:/usr/src/app/logs:rw
-      - ./error:/usr/src/app/error:rw
       - ./temp:/usr/src/app/temp:rw
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     depends_on:
       - backend-service
       - websocket-server
@@ -172,12 +188,14 @@ services:
       - CAMERA_NAME=camera3
       - BUFFER_SIZE=65536
       - THREAD_POOL_SIZE=4
+      - TZ=Asia/Shanghai
     user: "${UID}:${GID}"
     volumes:
       - ./data:/usr/src/app/data:rw
       - ./logs:/usr/src/app/logs:rw
-      - ./error:/usr/src/app/error:rw
       - ./temp:/usr/src/app/temp:rw
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     depends_on:
       - backend-service
       - websocket-server
@@ -201,9 +219,13 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
+    environment:
+      TZ: Asia/Shanghai
     volumes:
       - ./data:/app/data:rw
       - ./logs:/app/logs:rw
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     devices:
       - "/dev/ttyUSB0:/dev/ttyUSB0"
     privileged: true
@@ -244,7 +266,12 @@ services:
       - "3002:3000"
     env_file:
       - .env
+    environment:
+      TZ: Asia/Shanghai
     user: "${UID}:${GID}"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     # depends_on:
     #   - backend-service
     networks:
