@@ -101,6 +101,25 @@ crontab -e
 - **保留期限**：最近 45 天的数据
 - **清理后操作**：自动执行 `VACUUM ANALYZE` 优化表性能
 
+### 查看数据库表大小
+
+可以使用以下 SQL 查询查看各个表的大小（按总大小降序排列）：
+
+```sql
+SELECT
+    relname AS table,
+    pg_size_pretty(pg_total_relation_size(relid)) AS total
+FROM pg_catalog.pg_statio_user_tables
+ORDER BY pg_total_relation_size(relid) DESC;
+```
+
+**执行方式**：
+
+```bash
+# 通过 Docker 容器执行查询
+docker exec -i postgres psql -U weixing -d weixing-db -c "SELECT relname AS table, pg_size_pretty(pg_total_relation_size(relid)) AS total FROM pg_catalog.pg_statio_user_tables ORDER BY pg_total_relation_size(relid) DESC;"
+```
+
 ## 🔗 相关链接
 
 - [WSL USB 设备连接](https://learn.microsoft.com/zh-cn/windows/wsl/connect-usb)
