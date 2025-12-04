@@ -44,6 +44,7 @@ weixing-setup/
 ├── temp/                    # 临时文件
 ├── docker-compose.yml       # Docker配置
 ├── .env                     # 环境变量
+├── clean_database.sh        # 数据库清理脚本
 └── CHANGELOG.md             # 更新日志
 ```
 
@@ -66,6 +67,39 @@ weixing-setup/
 - 错误图片存储在 `data/error/` 子目录
 - 日志文件存储在 `logs/` 目录
 - 确保 `data/` 目录有足够的存储空间
+
+## 🗄️ 数据库维护
+
+### 自动清理历史数据
+
+项目提供了数据库清理脚本 `clean_database.sh`，用于定期清理历史数据（保留最近 45 天）。
+
+#### 手动执行清理
+
+```bash
+# 执行清理脚本
+./clean_database.sh
+```
+
+#### 设置定时任务（推荐）
+
+建议设置每日自动执行清理任务，避免数据库数据过多：
+
+```bash
+# 编辑 crontab
+crontab -e
+
+# 添加以下行（每天凌晨2点执行）
+0 2 * * * /home/tongrang/桌面/weixing-setup/clean_database.sh >> /home/tongrang/桌面/weixing-setup/logs/cleanup.log 2>&1
+```
+
+**注意**：请将路径替换为实际的项目路径。
+
+#### 清理说明
+
+- **清理表**：`quality_records` 和 `measurements`
+- **保留期限**：最近 45 天的数据
+- **清理后操作**：自动执行 `VACUUM ANALYZE` 优化表性能
 
 ## 🔗 相关链接
 
