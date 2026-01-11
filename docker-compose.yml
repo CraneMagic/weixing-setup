@@ -304,6 +304,7 @@ services:
       - IMAGE_SOURCE_MODE=docker_volume
       - CALIBRATION_MODE=auto
       - BACKEND_API_URL=http://backend-service:3000
+      - WS_URL=ws://websocket-server:8080
       - TZ=Asia/Shanghai
     depends_on:
       - websocket-server
