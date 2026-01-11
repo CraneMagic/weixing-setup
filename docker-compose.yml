@@ -285,6 +285,39 @@ services:
         limits:
           cpus: "0.50"
           memory: 512M
+  weixing-cv:
+    image: yijun9124/weixing-cv:${TAG:-latest}
+    container_name: weixing-cv
+    hostname: weixing-cv
+    restart: unless-stopped
+    env_file:
+      - .env
+    user: "${UID}:${GID}"
+    volumes:
+      - ./temp:/app/data/images:rw
+      - ./output:/app/output:rw
+      - ./logs:/app/logs:rw
+      - ./baseline.mat:/app/baseline.mat:ro
+    environment:
+      - BASELINE_PATH=/app/baseline.mat
+      - IMAGE_DIRECTORY=/app/data/images
+      - IMAGE_SOURCE_MODE=docker_volume
+      - CALIBRATION_MODE=auto
+      - BACKEND_API_URL=http://backend-service:3000
+      - TZ=Asia/Shanghai
+    depends_on:
+      - websocket-server
+      - backend-service
+    networks:
+      - weixing-network
+    deploy:
+      resources:
+        reservations:
+          cpus: "0.50"
+          memory: 512M
+        limits:
+          cpus: "1.00"
+          memory: 2G
 
 networks:
   weixing-network:
