@@ -294,7 +294,7 @@ services:
       - .env
     user: "${UID}:${GID}"
     volumes:
-      - ./temp:/app/data/images:rw
+      - ./data/images:/app/data/images:rw
       - ./output:/app/output:rw
       - ./logs:/app/logs:rw
       - ./baseline.mat:/app/baseline.mat:ro
