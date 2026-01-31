@@ -48,10 +48,10 @@ services:
       resources:
         reservations:
           cpus: "0.15"
-          memory: 128M
+          memory: 256M
         limits:
-          cpus: "0.30"
-          memory: 512M
+          cpus: "0.50"
+          memory: 1G
   udp-server:
     image: yijun9124/weixing-udp-server:${TAG:-latest}
     container_name: udp-server
