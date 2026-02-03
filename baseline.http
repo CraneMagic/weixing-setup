@@ -1,0 +1,15 @@
+### 更新相机 IP 列表
+POST http://localhost:3000/api/parameters/nested
+Content-Type: application/json
+
+{
+  "key": "computerVisionBaselineMat",
+  "path": "camIPList",
+  "value": ["192.168.1.140", "192.168.1.141", "192.168.1.142"]
+}
+
+### 查看当前 baseline 配置
+GET http://localhost:3000/api/parameters/computerVisionBaselineMat
+
+### 查看所有参数
+GET http://localhost:3000/api/parameters
