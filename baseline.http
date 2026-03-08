@@ -1,4 +1,32 @@
-### 更新相机 IP 列表
+### 查看当前 baseline 配置
+GET http://localhost:3000/api/parameters/computerVisionBaselineMat
+
+### 更新完整 baseline（覆盖整份配置）
+POST http://localhost:3000/api/parameters
+Content-Type: application/json
+
+{
+  "key": "computerVisionBaselineMat",
+  "value": {
+    "Dref_mm": 25,
+    "xc0_px": [601.16, 565.88, 637.73],
+    "w0_px": [522.66, 495.28, 505.21],
+    "s0_mm_per_px": [0.0478, 0.0505, 0.0495],
+    "Z0_mm": [200, 200, 200],
+    "k_px_per_mm": [],
+    "dxSign": [1, 1, 1],
+    "camIPList": ["192.168.1.140", "192.168.1.141", "192.168.1.142"],
+    "nFramesUsed": [8, 9, 7],
+    "timestamp": "2026-01-08 23:02:05",
+    "vp_opts": {
+      "gray_mode": "rgb2gray",
+      "otsu_step": 2,
+      "minWidthPx": 20
+    }
+  }
+}
+
+### 仅更新 baseline 的某一字段（如相机 IP 列表）
 POST http://localhost:3000/api/parameters/nested
 Content-Type: application/json
 
@@ -7,9 +35,6 @@ Content-Type: application/json
   "path": "camIPList",
   "value": ["192.168.1.140", "192.168.1.141", "192.168.1.142"]
 }
-
-### 查看当前 baseline 配置
-GET http://localhost:3000/api/parameters/computerVisionBaselineMat
 
 ### 查看所有参数
 GET http://localhost:3000/api/parameters
