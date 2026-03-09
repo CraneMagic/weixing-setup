@@ -221,6 +221,7 @@ services:
       - "3000:3000"
     environment:
       TZ: Asia/Shanghai
+      CV_SERVICE_URL: http://weixing-cv:3001
     volumes:
       - ./data:/app/data:rw
       - ./logs:/app/logs:rw
