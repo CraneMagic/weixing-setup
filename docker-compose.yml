@@ -25,7 +25,7 @@ services:
           cpus: "0.50"
           memory: 1G
   websocket-server:
-    image: yijun9124/weixing-websocket-server:${TAG:-latest}
+    image: registry.yijunstudio.xyz/weixing-websocket-server:${TAG:-latest}
     container_name: websocket-server
     hostname: websocket-server
     restart: unless-stopped
@@ -53,7 +53,7 @@ services:
           cpus: "0.50"
           memory: 1G
   udp-server:
-    image: yijun9124/weixing-udp-server:${TAG:-latest}
+    image: registry.yijunstudio.xyz/weixing-udp-server:${TAG:-latest}
     container_name: udp-server
     hostname: udp-server
     restart: unless-stopped
@@ -82,7 +82,7 @@ services:
           cpus: "0.25"
           memory: 256M
   # tcp-server:
-  #   image: yijun9124/weixing-tcp-server:${TAG:-latest}
+  #   image: registry.yijunstudio.xyz/weixing-tcp-server:${TAG:-latest}
   #   container_name: tcp-server
   #   hostname: tcp-server
   #   restart: unless-stopped
@@ -102,7 +102,7 @@ services:
   #   networks:
   #     - weixing-network
   tcp-server-1:
-    image: yijun9124/weixing-tcp-server:${TAG:-latest}
+    image: registry.yijunstudio.xyz/weixing-tcp-server:${TAG:-latest}
     container_name: tcp-server-1
     hostname: tcp-server-1
     restart: unless-stopped
@@ -138,7 +138,7 @@ services:
           cpus: "0.60"
           memory: 1G
   tcp-server-2:
-    image: yijun9124/weixing-tcp-server:${TAG:-latest}
+    image: registry.yijunstudio.xyz/weixing-tcp-server:${TAG:-latest}
     container_name: tcp-server-2
     hostname: tcp-server-2
     restart: unless-stopped
@@ -174,7 +174,7 @@ services:
           cpus: "0.60"
           memory: 1G
   tcp-server-3:
-    image: yijun9124/weixing-tcp-server:${TAG:-latest}
+    image: registry.yijunstudio.xyz/weixing-tcp-server:${TAG:-latest}
     container_name: tcp-server-3
     hostname: tcp-server-3
     restart: unless-stopped
@@ -210,7 +210,7 @@ services:
           cpus: "0.60"
           memory: 1G
   backend-service:
-    image: yijun9124/weixing-service:${TAG:-latest}
+    image: registry.yijunstudio.xyz/weixing-service:${TAG:-latest}
     container_name: backend-service
     hostname: backend-service
     user: "${UID}:${GID}"
@@ -260,7 +260,7 @@ services:
           cpus: "1.00"
           memory: 3G
   frontend:
-    image: yijun9124/weixing-frontend:${TAG:-latest}
+    image: registry.yijunstudio.xyz/weixing-frontend:${TAG:-latest}
     container_name: frontend
     hostname: frontend
     restart: unless-stopped
@@ -287,7 +287,7 @@ services:
           cpus: "0.50"
           memory: 512M
   weixing-cv:
-    image: yijun9124/weixing-cv:${TAG:-latest}
+    image: registry.yijunstudio.xyz/weixing-cv:${TAG:-latest}
     container_name: weixing-cv
     hostname: weixing-cv
     restart: unless-stopped
