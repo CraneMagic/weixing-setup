@@ -10,7 +10,45 @@
 - 确保有足够的磁盘空间（建议至少 10GB）
 - 串口设备权限（如果需要）
 
-### 2. 配置环境变量
+
+### 2. 配置 Docker Daemon（可选）
+
+如果需要通过代理访问互联网（如下载 Docker 镜像），可以配置 Docker Daemon 代理：
+
+#### Linux 系统配置步骤
+
+```bash
+# 1. 复制 daemon.json 到 Docker 配置目录
+sudo cp /home/tongrang/桌面/weixing-setup/daemon.json /etc/docker/daemon.json
+
+# 2. 编辑代理地址（根据实际代理地址修改）
+sudo nano /etc/docker/daemon.json
+
+# 3. 重启 Docker 服务使配置生效
+sudo systemctl restart docker
+
+# 4. 验证配置是否生效
+sudo docker info | grep -i proxy
+```
+
+#### Windows 系统配置步骤
+
+```powershell
+# 1. 复制 daemon.json 到 Docker 配置目录
+# 位置: %programdata%\docker\config\daemon.json
+# 或使用 Docker Desktop 设置界面配置代理
+
+# 2. 重启 Docker Desktop 应用
+```
+
+**注意**：
+- 请根据实际代理地址修改 `daemon.json` 中的 `http-proxy` 和 `https-proxy` 值
+- 如果不需要代理，可以跳过此步骤
+- 配置文件位置：
+  - Linux: `/etc/docker/daemon.json`
+  - Windows: `%programdata%\docker\config\daemon.json`
+
+### 3. 配置环境变量
 
 ```bash
 # 复制环境变量模板
@@ -20,7 +58,7 @@ cp .env.example .env
 nano .env
 ```
 
-### 3. 启动服务
+### 4. 启动服务
 
 ```bash
 # 启动所有服务
