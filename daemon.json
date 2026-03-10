@@ -2,10 +2,7 @@
   "registry-mirrors": [
     "https://pmubv1gq.mirror.aliyuncs.com"
   ],
-  "proxies": {
-    "http-proxy": "http://127.0.0.1:7890",
-    "https-proxy": "http://127.0.0.1:7890"
-  },
+  "proxies": {},
   "log-driver": "json-file",
   "log-opts": {
     "max-size": "10m",
