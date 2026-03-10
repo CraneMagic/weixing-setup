@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:15
+    image: registry.yijunstudio.xyz/postgres:${TAG:-15}
     restart: always
     container_name: postgres
     hostname: postgres
