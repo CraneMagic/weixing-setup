@@ -58,6 +58,8 @@ cp .env.example .env
 nano .env
 ```
 
+**后端服务 URL 配置**：`WEIXING_SERVICE_BASE_URL` 为后端服务基础地址，udp-server 等由此拼接 `/api/parameters`、`/api/measurements`、`/api/relay` 等路径。Docker 部署时通常为 `http://backend-service:3000`。
+
 ### 4. 启动服务
 
 ```bash
