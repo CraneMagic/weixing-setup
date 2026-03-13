@@ -63,6 +63,7 @@ services:
       - .env
     environment:
       TZ: Asia/Shanghai
+      WEIXING_SERVICE_BASE_URL: http://backend-service:3000
     user: "${UID}:${GID}"
     volumes:
       - ./data:/usr/src/app/data:rw
