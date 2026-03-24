@@ -44,14 +44,15 @@ services:
     #   - backend-service
     networks:
       - weixing-network
+    # 多路 CV/前端推送时易触顶 1G 导致 GC 抖动或 OOM，略增内存并从 tcp 侧匀出配额
     deploy:
       resources:
         reservations:
-          cpus: "0.15"
-          memory: 256M
+          cpus: "0.25"
+          memory: 512M
         limits:
-          cpus: "0.50"
-          memory: 1G
+          cpus: "0.75"
+          memory: 2G
   udp-server:
     image: registry.yijunstudio.xyz/weixing-udp-server:${TAG:-latest}
     container_name: udp-server
@@ -134,10 +135,10 @@ services:
       resources:
         reservations:
           cpus: "0.30"
-          memory: 256M
+          memory: 192M
         limits:
           cpus: "0.60"
-          memory: 1G
+          memory: 700M
   tcp-server-2:
     image: registry.yijunstudio.xyz/weixing-tcp-server:${TAG:-latest}
     container_name: tcp-server-2
@@ -170,10 +171,10 @@ services:
       resources:
         reservations:
           cpus: "0.30"
-          memory: 256M
+          memory: 192M
         limits:
           cpus: "0.60"
-          memory: 1G
+          memory: 700M
   tcp-server-3:
     image: registry.yijunstudio.xyz/weixing-tcp-server:${TAG:-latest}
     container_name: tcp-server-3
@@ -206,10 +207,10 @@ services:
       resources:
         reservations:
           cpus: "0.30"
-          memory: 256M
+          memory: 192M
         limits:
           cpus: "0.60"
-          memory: 1G
+          memory: 700M
   backend-service:
     image: registry.yijunstudio.xyz/weixing-service:${TAG:-latest}
     container_name: backend-service
