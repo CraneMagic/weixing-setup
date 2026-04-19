@@ -24,6 +24,12 @@ for skill_dir in "$SKILLS_SRC"/*/; do
   cp -r "$skill_dir" "$SKILLS_DST/$skill_name"
 done
 
+# 安装 AGENTS.md 到工作区根目录
+if [ -f "$SCRIPT_DIR/AGENTS.md" ]; then
+  cp "$SCRIPT_DIR/AGENTS.md" "$WORKSPACE/AGENTS.md"
+  echo "安装 AGENTS.md → $WORKSPACE/AGENTS.md"
+fi
+
 echo ""
 echo "已安装到 $SKILLS_DST:"
 ls -1 "$SKILLS_DST"
