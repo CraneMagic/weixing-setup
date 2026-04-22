@@ -71,7 +71,8 @@ services:
     volumes:
       - ./data:/usr/src/app/data:rw
       - ./logs:/usr/src/app/logs:rw
-      - ./ecc_model.json:/usr/src/app/ecc_model.json:ro
+      # 偏心补偿模型：放置 ecc_model.json 后取消注释即可覆盖镜像内默认模型
+      # - ./ecc_model.json:/usr/src/app/ecc_model.json:ro
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     # depends_on:
