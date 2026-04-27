@@ -11,6 +11,7 @@ services:
       - .env
     environment:
       TZ: Asia/Shanghai
+    shm_size: 256m
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
