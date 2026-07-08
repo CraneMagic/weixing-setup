@@ -1,0 +1,107 @@
+# ============================================================
+# Weixing 监控栈 - 与业务 compose 合并使用
+# ============================================================
+# 用法(推荐,与业务 compose 合并):
+#   docker compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
+#
+# 停止监控但保留业务:
+#   docker compose -f docker-compose.yml -f docker-compose.monitoring.yml stop alloy pushgateway
+#
+# 完全移除监控(保留业务):
+#   docker compose -f docker-compose.yml -f docker-compose.monitoring.yml rm -sf alloy pushgateway
+#
+# 前置:
+#   1. 已注册 Grafana Cloud,拿到 Prometheus endpoint / username / password
+#   2. .env 里填好 GRAFANA_CLOUD_* 三个变量
+#   3. PC_NUM 已设置(每台工控唯一)
+#
+# 说明:
+#   本 compose 复用业务 compose 的 weixing-network,通过合并启动自动打通。
+#   不能单独 `docker compose -f docker-compose.monitoring.yml up`,会因缺网络失败。
+# ============================================================
+
+services:
+  # ---- Grafana Alloy: 采集 + push 到 Grafana Cloud ----
+  alloy:
+    image: grafana/alloy:v1.4.2
+    container_name: alloy
+    hostname: alloy
+    restart: unless-stopped
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    environment:
+      # 通过 sys.env() 传给 config.alloy
+      PC_NUM: ${PC_NUM}
+      GRAFANA_CLOUD_PROM_URL: ${GRAFANA_CLOUD_PROM_URL}
+      GRAFANA_CLOUD_PROM_USERNAME: ${GRAFANA_CLOUD_PROM_USERNAME}
+      GRAFANA_CLOUD_PROM_PASSWORD: ${GRAFANA_CLOUD_PROM_PASSWORD}
+      TZ: Asia/Shanghai
+    volumes:
+      - ./monitoring/config.alloy:/etc/alloy/config.alloy:ro
+      - alloy-data:/var/lib/alloy/data
+      # 采集主机指标必需(node_exporter 从这些路径读)
+      - /:/host/root:ro,rslave
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      # 采集容器指标必需(cadvisor 需要 docker socket)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    ports:
+      # alloy 自身的 UI(http://localhost:12345,用于调试 pipeline)
+      - "127.0.0.1:12345:12345"
+    networks:
+      - weixing-network
+    deploy:
+      resources:
+        reservations:
+          cpus: "0.10"
+          memory: 128M
+        limits:
+          cpus: "0.30"
+          memory: 256M
+
+  # ---- Pushgateway: 接收 MaixCAM 相机的 push ----
+  # MaixCAM 上 Python 没有独立 HTTP server,通过 push 上报
+  # 工控机内网可访问,不对外暴露
+  pushgateway:
+    image: prom/pushgateway:v1.9.0
+    container_name: pushgateway
+    hostname: pushgateway
+    restart: unless-stopped
+    command:
+      - --persistence.file=/data/pushgateway.data
+      - --persistence.interval=5m
+      # push 后 10 分钟没更新就清掉(防止相机断了还留旧数据)
+      - --push.disable-consistency-check=false
+    volumes:
+      - pushgateway-data:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    ports:
+      # 相机推送地址: http://<工控 IP>:9091/metrics/job/weixing-camera/instance/<相机 IP>
+      - "9091:9091"
+    networks:
+      - weixing-network
+    deploy:
+      resources:
+        reservations:
+          cpus: "0.05"
+          memory: 32M
+        limits:
+          cpus: "0.20"
+          memory: 128M
+
+networks:
+  weixing-network:
+    # 合并启动时会与业务 compose 里的 weixing-network 合并,无需 external
+    driver: bridge
+
+volumes:
+  alloy-data:
+    driver: local
+  pushgateway-data:
+    driver: local

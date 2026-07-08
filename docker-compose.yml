@@ -1,4 +1,4 @@
-# 内存配额按「单机约 8GB RAM」收敛：各服务 limits 合计约 ~6.2GB，留出头给系统与 Docker。
+# 内存配额按「单机约 12GB RAM」收敛：各服务 limits 合计约 ~8.8GB，留出头给系统与 Docker。
 services:
   postgres:
     image: registry.yijunstudio.xyz/mirror/postgres:15
@@ -11,7 +11,7 @@ services:
       - .env
     environment:
       TZ: Asia/Shanghai
-    shm_size: 256m
+    shm_size: 512m
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
@@ -25,7 +25,7 @@ services:
           memory: 128M
         limits:
           cpus: "0.50"
-          memory: 512M
+          memory: 768M
   websocket-server:
     image: registry.yijunstudio.xyz/weixing-websocket-server:${TAG:-latest}
     container_name: websocket-server
@@ -46,7 +46,7 @@ services:
     #   - backend-service
     networks:
       - weixing-network
-    # 8GB 主机：给到 1.25G，比原 1G 更稳，又避免与 backend/cv 抢满内存
+    # 12GB 主机：给到 1.75G，大帧缓冲更宽裕
     deploy:
       resources:
         reservations:
@@ -54,7 +54,7 @@ services:
           memory: 384M
         limits:
           cpus: "0.60"
-          memory: 1280M
+          memory: 1792M
   udp-server:
     image: registry.yijunstudio.xyz/weixing-udp-server:${TAG:-latest}
     container_name: udp-server
@@ -87,7 +87,7 @@ services:
           memory: 128M
         limits:
           cpus: "0.25"
-          memory: 256M
+          memory: 384M
   # tcp-server:
   #   image: registry.yijunstudio.xyz/weixing-tcp-server:${TAG:-latest}
   #   container_name: tcp-server
@@ -143,7 +143,7 @@ services:
           memory: 128M
         limits:
           cpus: "0.60"
-          memory: 320M
+          memory: 512M
   tcp-server-2:
     image: registry.yijunstudio.xyz/weixing-tcp-server:${TAG:-latest}
     container_name: tcp-server-2
@@ -179,7 +179,7 @@ services:
           memory: 128M
         limits:
           cpus: "0.60"
-          memory: 320M
+          memory: 512M
   tcp-server-3:
     image: registry.yijunstudio.xyz/weixing-tcp-server:${TAG:-latest}
     container_name: tcp-server-3
@@ -215,7 +215,7 @@ services:
           memory: 128M
         limits:
           cpus: "0.60"
-          memory: 320M
+          memory: 512M
   backend-service:
     image: registry.yijunstudio.xyz/weixing-service:${TAG:-latest}
     container_name: backend-service
@@ -265,7 +265,7 @@ services:
           memory: 512M
         limits:
           cpus: "1.00"
-          memory: 1280M
+          memory: 1792M
   frontend:
     image: registry.yijunstudio.xyz/weixing-frontend:${TAG:-latest}
     container_name: frontend
@@ -292,7 +292,7 @@ services:
           memory: 128M
         limits:
           cpus: "0.50"
-          memory: 384M
+          memory: 512M
   weixing-cv:
     image: registry.yijunstudio.xyz/weixing-cv:${TAG:-latest}
     container_name: weixing-cv
@@ -322,8 +322,8 @@ services:
       - backend-service
     networks:
       - weixing-network
-    # 8GB 主机：适当减小 shm，仍满足常见 OpenCV/多进程需求
-    shm_size: 256m
+    # 12GB 主机：shm 增到 512M，CV 内存上限提到 2G
+    shm_size: 512m
     # 日志配置，防止日志文件过大
     logging:
       driver: "json-file"
@@ -344,7 +344,7 @@ services:
           memory: 512M
         limits:
           cpus: "2.00"
-          memory: 1536M
+          memory: 2048M
 
 networks:
   weixing-network:

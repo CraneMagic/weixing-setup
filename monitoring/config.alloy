@@ -1,0 +1,130 @@
+// ============================================================
+// Grafana Alloy 配置 - Weixing 工控设备监控
+// ============================================================
+// 采集来源:
+//   1. 主机指标   -> node_exporter 内置采集器
+//   2. 容器指标   -> cadvisor 内置采集器
+//   3. 业务指标   -> tcp-server / weixing-cv 的 /metrics 端点(HTTP pull)
+//   4. Python 端  -> pushgateway 接收 MaixCAM 主动推送
+// 输出:
+//   -> Grafana Cloud Prometheus (remote_write)
+//
+// 所有指标由 alloy 附加 pc_num label,用于区分工控设备。
+// MaixCAM push 时不需要自带 pc_num,统一由 alloy 补。
+// ============================================================
+
+// -------- 1. 主机层指标 (node_exporter 集成) --------
+prometheus.exporter.unix "host" {
+  rootfs_path = "/host/root"
+  procfs_path = "/host/proc"
+  sysfs_path  = "/host/sys"
+
+  set_collectors = [
+    "cpu",
+    "diskstats",
+    "filesystem",
+    "loadavg",
+    "meminfo",
+    "netdev",
+    "netstat",
+    "sockstat",
+    "stat",
+    "time",
+    "uname",
+    "vmstat",
+  ]
+
+  filesystem {
+    fs_types_exclude     = "^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$"
+    mount_points_exclude = "^/(dev|proc|sys|run|var/lib/docker/.+|var/lib/kubelet/.+)($|/)"
+    mount_timeout        = "5s"
+  }
+
+  netdev {
+    device_exclude = "^(veth.*|docker.*|br-.*|lo)$"
+  }
+}
+
+// -------- 2. 容器层指标 (cadvisor 集成) --------
+prometheus.exporter.cadvisor "containers" {
+  docker_host      = "unix:///var/run/docker.sock"
+  storage_duration = "5m"
+
+  disabled_metrics = [
+    "referenced_memory",
+    "cpu_topology",
+    "resctrl",
+    "udp_usage",
+    "advtcp",
+    "sched",
+    "hugetlb",
+    "memory_numa",
+    "tcp",
+    "tcp_usage",
+    "process",
+  ]
+}
+
+// -------- 3. 汇总主机 + 容器指标并 scrape --------
+prometheus.scrape "host_and_containers" {
+  targets = concat(
+    prometheus.exporter.unix.host.targets,
+    prometheus.exporter.cadvisor.containers.targets,
+  )
+  scrape_interval = "60s"
+  forward_to      = [prometheus.relabel.add_pc_num.receiver]
+}
+
+// -------- 4. 业务服务 /metrics 抓取 --------
+// 注:tcp-server-1/2/3、weixing-cv 等服务后续加了 /metrics 端点后,
+// alloy 会自动 scrape。scrape 失败会日志报 warn 但不影响其他,
+// 所以可以先放着,业务服务上线后自动生效。
+prometheus.scrape "business" {
+  targets = [
+    { __address__ = "tcp-server-1:9100", service = "tcp-server", camera_id = "1" },
+    { __address__ = "tcp-server-2:9100", service = "tcp-server", camera_id = "2" },
+    { __address__ = "tcp-server-3:9100", service = "tcp-server", camera_id = "3" },
+    { __address__ = "weixing-cv:3001",   service = "weixing-cv" },
+  ]
+  scrape_interval = "60s"
+  scrape_timeout  = "10s"
+  forward_to      = [prometheus.relabel.add_pc_num.receiver]
+}
+
+// -------- 5. Pushgateway (接收 MaixCAM 相机的 push) --------
+// MaixCAM 无 HTTP server,主动 push 到工控上的 pushgateway
+// 相机端 push 时不需要带 pc_num,由 alloy 统一附加
+prometheus.scrape "pushgateway" {
+  targets         = [{ __address__ = "pushgateway:9091", service = "camera" }]
+  scrape_interval = "60s"
+  honor_labels    = true
+  forward_to      = [prometheus.relabel.add_pc_num.receiver]
+}
+
+// -------- 6. 统一附加 pc_num label --------
+prometheus.relabel "add_pc_num" {
+  rule {
+    target_label = "pc_num"
+    replacement  = sys.env("PC_NUM")
+  }
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+}
+
+// -------- 7. 输出到 Grafana Cloud --------
+prometheus.remote_write "grafana_cloud" {
+  endpoint {
+    url = sys.env("GRAFANA_CLOUD_PROM_URL")
+    basic_auth {
+      username = sys.env("GRAFANA_CLOUD_PROM_USERNAME")
+      password = sys.env("GRAFANA_CLOUD_PROM_PASSWORD")
+    }
+  }
+  // 未来切自建 VictoriaMetrics 时,在这里加第二个 endpoint block
+  // 就能双写并行验证,验证 ok 后再删掉 grafana_cloud 那个
+}
+
+// -------- 8. Alloy 自身日志 --------
+logging {
+  level  = "info"
+  format = "logfmt"
+}
