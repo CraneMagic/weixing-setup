@@ -1,5 +1,7 @@
 [wsl2]
-memory=16GB        # 分配给 WSL2 的最大内存
-processors=4      # 可用的 CPU 核心数
-swap=0            # Swap 文件大小（虚拟内存）
-localhostForwarding=true  # 启用 localhost 转发（建议开启）
+# 与 docker-compose 的容器内存分配保持一致（按 12GB 主机规划），并留出余量给 Windows 桌面。
+# 若物理机只有 8GB，本机改为 6GB 左右，勿提交。
+memory=12GB
+processors=4
+swap=2GB
+localhostForwarding=true
