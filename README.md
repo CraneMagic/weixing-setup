@@ -7,11 +7,19 @@
 ### 1. 环境准备
 
 - Docker 和 Docker Compose
+- 私有 Docker Registry 访问权限（见 [PRIVATE_REGISTRY.md](PRIVATE_REGISTRY.md)）
 - 确保有足够的磁盘空间（建议至少 10GB）
 - 串口设备权限（如果需要）
 
+### 2. 登录私有 Registry
 
-### 2. 配置 Docker Daemon（可选）
+```bash
+docker login registry.yijunstudio.xyz
+```
+
+输入您的用户名和密码。详见 [私有 Docker Registry 配置说明](PRIVATE_REGISTRY.md)。
+
+### 3. 配置 Docker Daemon（可选）
 
 如果需要通过代理访问互联网（如下载 Docker 镜像），可以配置 Docker Daemon 代理：
 
@@ -48,7 +56,7 @@ sudo docker info | grep -i proxy
   - Linux: `/etc/docker/daemon.json`
   - Windows: `%programdata%\docker\config\daemon.json`
 
-### 3. 配置环境变量
+### 4. 配置环境变量
 
 ```bash
 # 复制环境变量模板
@@ -60,7 +68,21 @@ nano .env
 
 **后端服务 URL 配置**：`WEIXING_SERVICE_BASE_URL` 为后端服务基础地址，udp-server 等由此拼接 `/api/parameters`、`/api/measurements`、`/api/relay` 等路径。Docker 部署时通常为 `http://backend-service:3000`。
 
-### 4. 启动服务
+### 5. 快速安装（推荐）
+
+使用自动化装机脚本：
+
+```bash
+# 复制 weixing-setup 到目标机器桌面后
+cd ~/桌面/weixing-setup
+bash install.sh
+```
+
+脚本会自动完成环境检查、目录创建、Registry 登录、镜像拉取等所有配置步骤。
+
+详见 [装机脚本使用说明](INSTALL.md)。
+
+### 6. 手动启动服务（如果不使用装机脚本）
 
 ```bash
 # 启动所有服务
