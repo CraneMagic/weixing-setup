@@ -332,11 +332,18 @@ services:
         max-file: "3"
     # 健康检查
     healthcheck:
-      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      # 真正探标定服务的 3001 端口：进程死掉时 docker ps 会显示 unhealthy
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:3001/health', timeout=5)",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 60s
     deploy:
       resources:
         reservations:
