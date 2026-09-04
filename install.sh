@@ -168,6 +168,28 @@ rm -f .env.bak
 
 log_info "✓ UID/GID 已更新: $CURRENT_UID:$CURRENT_GID"
 
+# 按物理内存自动选择配额档：8GB 机器叠加 docker-compose.8g.yml，12GB 用 base 默认值。
+# 阈值取 10GB —— 8G 机器实际可见约 7.6G，12G 约 11.6G，10G 能稳定区分两者。
+TOTAL_MEM_MB=$(free -m 2>/dev/null | awk '/^Mem:/{print $2}')
+if [[ -n "$TOTAL_MEM_MB" ]]; then
+    if [[ "$TOTAL_MEM_MB" -lt 10240 ]]; then
+        PROFILE_LINE="COMPOSE_FILE=docker-compose.yml:docker-compose.8g.yml"
+        log_info "检测到物理内存 ${TOTAL_MEM_MB}MB → 使用 8GB 配额档"
+    else
+        PROFILE_LINE="# COMPOSE_FILE=docker-compose.yml:docker-compose.8g.yml"
+        log_info "检测到物理内存 ${TOTAL_MEM_MB}MB → 使用默认（12GB）配额档"
+    fi
+    # 已存在该行（含注释形态）则替换，否则追加
+    if grep -qE "^#? *COMPOSE_FILE=" .env; then
+        sed -i.bak "s|^#\? *COMPOSE_FILE=.*|$PROFILE_LINE|" .env
+        rm -f .env.bak
+    else
+        printf '\n%s\n' "$PROFILE_LINE" >> .env
+    fi
+else
+    log_warn "无法检测物理内存，请手动确认 .env 中的 COMPOSE_FILE 配额档"
+fi
+
 if [[ -z "$PC_NUM" ]]; then
     HOSTNAME=$(hostname)
     USERNAME=$(whoami)

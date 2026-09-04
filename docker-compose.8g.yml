@@ -1,0 +1,68 @@
+# 8GB 机器的内存配额覆盖档（增量文件，只写与 docker-compose.yml 不同的部分）。
+#
+# 数值来自 e85c7cc「调整 12GB 内存分配」之前的历史配置，即 8GB 机器上
+# 实际跑过的那一套（当时文件头注明：limits 合计约 ~6.2GB，留头给系统与 Docker），
+# 不是重新估算的值。
+#
+# 用法：不要单独使用，必须与 base 叠加。在 .env 中设置
+#   COMPOSE_FILE=docker-compose.yml:docker-compose.8g.yml
+# 之后 docker-compose up -d / pull / logs 等命令照常用，无需加 -f。
+# 12GB 机器不设这一行，直接用 docker-compose.yml 的默认配额。
+#
+# 注：CPU 配额两档相同（8G 档时期与现在一致），故本文件只覆盖 memory 与 shm_size。
+services:
+  postgres:
+    shm_size: 256m
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  websocket-server:
+    deploy:
+      resources:
+        limits:
+          memory: 1280M
+
+  udp-server:
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  tcp-server-1:
+    deploy:
+      resources:
+        limits:
+          memory: 320M
+
+  tcp-server-2:
+    deploy:
+      resources:
+        limits:
+          memory: 320M
+
+  tcp-server-3:
+    deploy:
+      resources:
+        limits:
+          memory: 320M
+
+  backend-service:
+    deploy:
+      resources:
+        limits:
+          memory: 1280M
+
+  frontend:
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+
+  weixing-cv:
+    shm_size: 256m
+    deploy:
+      resources:
+        limits:
+          memory: 1536M
