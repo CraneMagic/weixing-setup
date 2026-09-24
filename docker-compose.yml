@@ -123,6 +123,9 @@ services:
       - CAMERA_NAME=camera1
       - BUFFER_SIZE=65536
       - THREAD_POOL_SIZE=4
+      # 只在本容器开启：三个 tcp-server 共享同一个 data 卷，
+      # 全目录清理扫描必须单实例，否则会对同一批目录跑三套定时器
+      - CLEANUP_SWEEP_ENABLED=true
       - TZ=Asia/Shanghai
     user: "${UID}:${GID}"
     volumes:
