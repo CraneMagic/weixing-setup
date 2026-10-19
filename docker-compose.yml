@@ -357,9 +357,10 @@ services:
           memory: 2048M
 
   weixing-heartbeat:
-    image: registry.yijunstudio.xyz/weixing-heartbeat:${TAG:-latest}
+    image: registry.yijunstudio.xyz/weixing-heartbeat:${HEARTBEAT_TAG:-latest}
     container_name: weixing-heartbeat
     hostname: weixing-heartbeat
+    init: true
     restart: unless-stopped
     environment:
       - PC_NUM=${PC_NUM}

@@ -77,7 +77,11 @@ FLEET_API_URL=https://weixing-measurement-service-configuration.dev.yijunstudio.
 FLEET_TOKEN=<向管理员索取>
 ```
 
-未填写时该容器会启动失败并退出（`restart: unless-stopped` 会反复重启），不影响其它业务容器。
+未填写时该容器保持运行但空转，只输出一条错误日志，不影响其它业务容器；填写 `FLEET_API_URL` / `FLEET_TOKEN` 后执行 `docker compose up -d weixing-heartbeat` 即可生效。
+
+每台机器的 `PC_NUM` 必须唯一，否则多台机器会被合并成同一台设备。
+
+上线顺序：必须先把 heartbeat 镜像推送到镜像仓库，再让现场拉取本次 compose 变更，否则 `docker compose up` 会因拉取不到该镜像而失败。镜像标签由 `HEARTBEAT_TAG`（默认 `latest`）控制，独立于业务 `TAG`。
 
 ### 5. 快速安装（推荐）
 
