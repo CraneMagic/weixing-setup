@@ -356,6 +356,35 @@ services:
           cpus: "2.00"
           memory: 2048M
 
+  weixing-heartbeat:
+    image: registry.yijunstudio.xyz/weixing-heartbeat:${TAG:-latest}
+    container_name: weixing-heartbeat
+    hostname: weixing-heartbeat
+    restart: unless-stopped
+    environment:
+      - PC_NUM=${PC_NUM}
+      - COMPOSE_TAG=${TAG:-latest}
+      - FLEET_API_URL=${FLEET_API_URL}
+      - FLEET_TOKEN=${FLEET_TOKEN}
+      - DISK_PATH=/fleet-data
+      - TZ=Asia/Shanghai
+    volumes:
+      # :ro 不限制 API 权限，heartbeat 代码只发 GET 请求
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data:/fleet-data:ro
+    networks:
+      - weixing-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+
 networks:
   weixing-network:
     driver: bridge
