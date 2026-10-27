@@ -173,10 +173,37 @@ chmod -R 755 data logs temp output
 ls -l /dev/ttyUSB*
 ```
 
+### 串口设备（报警灯 / 继电器）
+
+backend-service 按 by-id 映射串口，主机上 `ttyUSB` 编号怎么变都不会接错：
+
+| 设备 | 主机路径（by-id） | 容器内路径 |
+|---|---|---|
+| 报警灯（CH341，`1a86:5523`） | `/dev/serial/by-id/usb-1a86_5523-if00-port0` | `/dev/weixing-alarm`（兼容 `/dev/ttyUSB0`） |
+| 继电器（CH340，`1a86:7523`） | `/dev/serial/by-id/usb-1a86_USB_Serial-if00-port0` | `/dev/weixing-relay`（兼容 `/dev/ttyUSB1`） |
+
+service 选串口的顺序：环境变量 `ALARM_SERIAL_PORT` / `RELAY_SERIAL_PORT` > `/dev/weixing-*` > `/dev/ttyUSB0/1`。
+启动日志 `正在打开alarm串口: <路径>` 会显示实际用的是哪个。
+
+```bash
+# 确认两个 by-id 都在
+ls -l /dev/serial/by-id/
+```
+
+- **缺任何一个，backend-service 都会启动失败**（`docker compose ps -a` 显示 `Created`，报 `error gathering device information`）。
+- 现场设备型号不同：在 `.env` 里设置 `ALARM_DEVICE=` / `RELAY_DEVICE=` 指向实际的 by-id 路径。
+- 不接报警灯/继电器的机器：新建 `docker-compose.override.yml`，内容为
+  ```yaml
+  services:
+    backend-service:
+      devices: !reset []
+  ```
+- CH340 没有序列号，同一台机器上**不要再插第二个 `1a86:7523` 串口**，否则两个设备 by-id 同名，继电器可能指到另一个设备上。
+
 ## 注意事项
 
 1. **首次运行前**，请确保 `.env` 文件中的数据库密码和 OSS 密钥已正确配置
-2. **串口设备**需要 `/dev/ttyUSB0` 和 `/dev/ttyUSB1` 可用
+2. **串口设备**按 by-id 映射，需要 `/dev/serial/by-id/` 下有报警灯和继电器两个设备（见上文“串口设备”）
 3. **定时清理任务**默认每天凌晨 2:00 执行，可编辑 crontab 修改
 4. **建议定期备份** `data/` 目录中的数据
 5. **确保有足够的磁盘空间**（建议至少 10GB）

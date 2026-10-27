@@ -234,9 +234,16 @@ services:
       - ./logs:/app/logs:rw
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
+    # 串口按 by-id 映射，不随主机 ttyUSB 编号变化（重启/插拔后 0/1 会对调，导致灯和继电器收错命令）。
+    # 每个设备映射两个名字：/dev/weixing-* 给新版 service 用，ttyUSB0/1 兼容旧镜像。
+    # 设备型号不同的现场可在 .env 里用 ALARM_DEVICE / RELAY_DEVICE 覆盖。
     devices:
-      - "/dev/ttyUSB0:/dev/ttyUSB0"
-      - "/dev/ttyUSB1:/dev/ttyUSB1"
+      # 报警灯（CH341 1a86:5523）
+      - "${ALARM_DEVICE:-/dev/serial/by-id/usb-1a86_5523-if00-port0}:/dev/weixing-alarm"
+      - "${ALARM_DEVICE:-/dev/serial/by-id/usb-1a86_5523-if00-port0}:/dev/ttyUSB0"
+      # 继电器（CH340 1a86:7523）
+      - "${RELAY_DEVICE:-/dev/serial/by-id/usb-1a86_USB_Serial-if00-port0}:/dev/weixing-relay"
+      - "${RELAY_DEVICE:-/dev/serial/by-id/usb-1a86_USB_Serial-if00-port0}:/dev/ttyUSB1"
     privileged: true
     env_file:
       - .env

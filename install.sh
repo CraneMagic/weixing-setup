@@ -263,7 +263,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo ""
     log_warn "重要提示："
     log_warn "  1. 请检查 .env 文件中的配置是否正确"
-    log_warn "  2. 如需串口设备，请确保 /dev/ttyUSB0 和 /dev/ttyUSB1 可用"
+    log_warn "  2. 串口按 by-id 映射，请确认 ls -l /dev/serial/by-id/ 中有报警灯 usb-1a86_5523-if00-port0 和继电器 usb-1a86_USB_Serial-if00-port0，缺任一个 backend-service 都启动不了"
     log_warn "  3. 定时清理任务已设置，日志保存在 logs/cleanup.log"
     log_warn "  4. 建议定期备份 data/ 目录中的数据"
     echo ""
