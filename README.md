@@ -68,6 +68,21 @@ nano .env
 
 **后端服务 URL 配置**：`WEIXING_SERVICE_BASE_URL` 为后端服务基础地址，udp-server 等由此拼接 `/api/parameters`、`/api/measurements`、`/api/relay` 等路径。Docker 部署时通常为 `http://backend-service:3000`。
 
+### 设备看板心跳（weixing-heartbeat）
+
+`weixing-heartbeat` 每 60 秒把本机主机信息、各容器状态与镜像版本上报到远端，在 reviewer 前端「设备」页面查看。需要在 `.env` 中填写：
+
+```bash
+FLEET_API_URL=https://weixing-measurement-service-configuration.dev.yijunstudio.xyz
+FLEET_TOKEN=<向管理员索取>
+```
+
+未填写时该容器保持运行但空转，只输出一条错误日志，不影响其它业务容器；填写 `FLEET_API_URL` / `FLEET_TOKEN` 后执行 `docker compose up -d weixing-heartbeat` 即可生效。
+
+每台机器的 `PC_NUM` 必须唯一，否则多台机器会被合并成同一台设备。
+
+上线顺序：必须先把 heartbeat 镜像推送到镜像仓库，再让现场拉取本次 compose 变更，否则 `docker compose up` 会因拉取不到该镜像而失败。镜像标签由 `HEARTBEAT_TAG`（默认 `latest`）控制，独立于业务 `TAG`。
+
 ### 5. 快速安装（推荐）
 
 使用自动化装机脚本：
