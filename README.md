@@ -66,7 +66,44 @@ cp .env.example .env
 nano .env
 ```
 
+### 单独指定镜像版本
+
+`.env` 的 `TAG` 仍是业务镜像的统一默认值。可复制本机版本模板，分别固定各服务：
+
+```bash
+cp .env.local.example .env.local
+nano .env.local
+```
+
+```dotenv
+SERVICE_TAG=2026.11.14-xxxxxxxxxxxx
+FRONTEND_TAG=2026.11.14-yyyyyyyyyyyy
+TCP_SERVER_TAG=2026.11.14-zzzzzzzzzzzz
+```
+
+可用变量：`WEBSOCKET_TAG`、`UDP_TAG`、`TCP_SERVER_TAG`（三路共用）、`SERVICE_TAG`、`FRONTEND_TAG`、`CV_TAG`。未设置或留空时回退到 `TAG`，最后回退到 `latest`。`HEARTBEAT_TAG` 独立配置，默认 `latest`。标签必须对应各仓库已发布的实际版本。
+
+```bash
+./compose.sh config --images  # 检查最终版本，不启动容器
+./compose.sh pull
+./compose.sh up -d
+```
+
+`compose.sh` 使用 Docker Compose V2（支持多个 `--env-file`），依次读取 `.env` 和可选的 `.env.local`，后者覆盖前者；shell 中已导出的同名变量优先级最高。`.env.local` 不提交 Git。直接运行 `docker compose` 不会自动读取 `.env.local`；也可把上述变量直接写入 `.env`。`install.sh` 的拉取和启动步骤使用同一入口。原有 `.env` 中的 `COMPOSE_FILE` 内存档位配置继续生效。
+
 **后端服务 URL 配置**：`WEIXING_SERVICE_BASE_URL` 为后端服务基础地址，udp-server 等由此拼接 `/api/parameters`、`/api/measurements`、`/api/relay` 等路径。Docker 部署时通常为 `http://backend-service:3000`。
+
+### 导出当前设备镜像版本
+
+在当前设备的 setup 目录运行（需要 Bash 和 Docker 访问权限）：
+
+```bash
+./export-current-env.sh
+```
+
+生成 `.env.current`，复制到另一台设备的 setup 目录并命名为 `.env.local`，然后使用 `./compose.sh config --images` 检查，再执行 `./compose.sh pull` 和 `./compose.sh up -d`。也可用 `--output 路径` 指定输出位置。
+
+脚本读取正在运行的容器及其实际镜像摘要，导出 `latest@sha256:...`，确保目标设备拉取相同镜像。摘要对应当前平台，因此此文件用于相同平台的设备（例如均为 `linux/amd64`）。全部七类服务必须运行，三路 TCP 必须使用同一镜像，且本地镜像必须有配置仓库的 RepoDigest；否则报错并保留旧文件。文件仅包含镜像版本，不包含密码、网络或设备配置，也不自动修改目标设备或重启服务。
 
 ### 设备看板心跳（weixing-heartbeat）
 
@@ -101,13 +138,13 @@ bash install.sh
 
 ```bash
 # 启动所有服务
-docker-compose up -d
+./compose.sh up -d
 
 # 查看服务状态
-docker-compose ps
+./compose.sh ps
 
 # 查看日志
-docker-compose logs -f
+./compose.sh logs -f
 ```
 
 ## 📁 目录结构

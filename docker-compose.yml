@@ -27,7 +27,7 @@ services:
           cpus: "0.50"
           memory: 768M
   websocket-server:
-    image: registry.yijunstudio.xyz/weixing-websocket-server:${TAG:-latest}
+    image: registry.yijunstudio.xyz/weixing-websocket-server:${WEBSOCKET_TAG:-${TAG:-latest}}
     container_name: websocket-server
     hostname: websocket-server
     restart: unless-stopped
@@ -56,7 +56,7 @@ services:
           cpus: "0.60"
           memory: 1792M
   udp-server:
-    image: registry.yijunstudio.xyz/weixing-udp-server:${TAG:-latest}
+    image: registry.yijunstudio.xyz/weixing-udp-server:${UDP_TAG:-${TAG:-latest}}
     container_name: udp-server
     hostname: udp-server
     restart: unless-stopped
@@ -89,7 +89,7 @@ services:
           cpus: "0.25"
           memory: 384M
   # tcp-server:
-  #   image: registry.yijunstudio.xyz/weixing-tcp-server:${TAG:-latest}
+  #   image: registry.yijunstudio.xyz/weixing-tcp-server:${TCP_SERVER_TAG:-${TAG:-latest}}
   #   container_name: tcp-server
   #   hostname: tcp-server
   #   restart: unless-stopped
@@ -109,7 +109,7 @@ services:
   #   networks:
   #     - weixing-network
   tcp-server-1:
-    image: registry.yijunstudio.xyz/weixing-tcp-server:${TAG:-latest}
+    image: registry.yijunstudio.xyz/weixing-tcp-server:${TCP_SERVER_TAG:-${TAG:-latest}}
     container_name: tcp-server-1
     hostname: tcp-server-1
     restart: unless-stopped
@@ -145,7 +145,7 @@ services:
           cpus: "0.60"
           memory: 512M
   tcp-server-2:
-    image: registry.yijunstudio.xyz/weixing-tcp-server:${TAG:-latest}
+    image: registry.yijunstudio.xyz/weixing-tcp-server:${TCP_SERVER_TAG:-${TAG:-latest}}
     container_name: tcp-server-2
     hostname: tcp-server-2
     restart: unless-stopped
@@ -181,7 +181,7 @@ services:
           cpus: "0.60"
           memory: 512M
   tcp-server-3:
-    image: registry.yijunstudio.xyz/weixing-tcp-server:${TAG:-latest}
+    image: registry.yijunstudio.xyz/weixing-tcp-server:${TCP_SERVER_TAG:-${TAG:-latest}}
     container_name: tcp-server-3
     hostname: tcp-server-3
     restart: unless-stopped
@@ -217,7 +217,7 @@ services:
           cpus: "0.60"
           memory: 512M
   backend-service:
-    image: registry.yijunstudio.xyz/weixing-service:${TAG:-latest}
+    image: registry.yijunstudio.xyz/weixing-service:${SERVICE_TAG:-${TAG:-latest}}
     container_name: backend-service
     hostname: backend-service
     user: "${UID}:${GID}"
@@ -274,7 +274,7 @@ services:
           cpus: "1.00"
           memory: 1792M
   frontend:
-    image: registry.yijunstudio.xyz/weixing-frontend:${TAG:-latest}
+    image: registry.yijunstudio.xyz/weixing-frontend:${FRONTEND_TAG:-${TAG:-latest}}
     container_name: frontend
     hostname: frontend
     restart: unless-stopped
@@ -301,7 +301,7 @@ services:
           cpus: "0.50"
           memory: 512M
   weixing-cv:
-    image: registry.yijunstudio.xyz/weixing-cv:${TAG:-latest}
+    image: registry.yijunstudio.xyz/weixing-cv:${CV_TAG:-${TAG:-latest}}
     container_name: weixing-cv
     hostname: weixing-cv
     restart: unless-stopped

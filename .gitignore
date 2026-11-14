@@ -6,3 +6,5 @@ logs/
 .env*
 !.env.example
 .DS_Store
+
+!.env.local.example

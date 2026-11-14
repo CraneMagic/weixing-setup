@@ -53,11 +53,11 @@ if ! command -v docker &> /dev/null; then
 fi
 log_info "✓ Docker 已安装: $(docker --version | cut -d' ' -f3 | tr -d ',')"
 
-if ! command -v docker-compose &> /dev/null; then
+if ! docker compose version >/dev/null 2>&1 && ! command -v docker-compose &> /dev/null; then
     log_error "Docker Compose 未安装，请先安装 Docker Compose"
     exit 1
 fi
-log_info "✓ Docker Compose 已安装: $(docker-compose --version | cut -d' ' -f4 | tr -d ',')"
+log_info "✓ Docker Compose 已安装"
 
 AVAILABLE_SPACE=$(df -BG . | tail -1 | awk '{print $4}' | tr -d 'G')
 if [[ $AVAILABLE_SPACE -lt 10 ]]; then
@@ -223,10 +223,10 @@ log_info "步骤 7/8: 拉取 Docker 镜像"
 log_warn "这可能需要几分钟时间，请耐心等待..."
 echo ""
 
-if docker-compose pull; then
+if bash "$SCRIPT_DIR/compose.sh" pull; then
     log_info "✓ Docker 镜像拉取完成"
 else
-    log_warn "部分镜像拉取失败，可以稍后手动执行: docker-compose pull"
+    log_warn "部分镜像拉取失败，可以稍后手动执行: ./compose.sh pull"
 fi
 
 echo ""
@@ -237,13 +237,13 @@ read -p "是否立即启动所有服务？(y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     log_info "启动 Docker 服务..."
-    docker-compose up -d
+    bash "$SCRIPT_DIR/compose.sh" up -d
 
     log_info "等待服务启动（10秒）..."
     sleep 10
 
     log_info "检查服务状态..."
-    docker-compose ps
+    bash "$SCRIPT_DIR/compose.sh" ps
 
     echo ""
     log_info "================================================"
@@ -256,10 +256,10 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     log_info "  - WebSocket: ws://localhost:8080"
     echo ""
     log_info "常用命令："
-    log_info "  - 查看日志: docker-compose logs -f"
-    log_info "  - 停止服务: docker-compose down"
-    log_info "  - 重启服务: docker-compose restart"
-    log_info "  - 查看状态: docker-compose ps"
+    log_info "  - 查看日志: ./compose.sh logs -f"
+    log_info "  - 停止服务: ./compose.sh down"
+    log_info "  - 重启服务: ./compose.sh restart"
+    log_info "  - 查看状态: ./compose.sh ps"
     echo ""
     log_warn "重要提示："
     log_warn "  1. 请检查 .env 文件中的配置是否正确"
@@ -268,7 +268,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     log_warn "  4. 建议定期备份 data/ 目录中的数据"
     echo ""
 else
-    log_info "跳过服务启动，可稍后手动执行: docker-compose up -d"
+    log_info "跳过服务启动，可稍后手动执行: ./compose.sh up -d"
 fi
 
 log_info "================================================"
